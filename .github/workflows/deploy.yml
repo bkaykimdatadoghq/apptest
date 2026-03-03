@@ -3,16 +3,23 @@ name: Deploy to Azure App Service
 on:
   push:
     branches: [main]
+    paths:
+      - 'azure-appservice/**'
   workflow_dispatch:
 
 env:
   DOTNET_VERSION: '8.x'
-  PROJECT_PATH: './src/SampleApp.csproj'
-  PUBLISH_DIR: './publish'
+  WORKING_DIR: './azure-appservice'
+  PROJECT_PATH: './azure-appservice/src/SampleApp.csproj'
+  PUBLISH_DIR: './azure-appservice/publish'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
 
     steps:
       - uses: actions/checkout@v4
@@ -24,9 +31,9 @@ jobs:
 
       - name: Build and publish
         run: |
-          dotnet publish ${{ env.PROJECT_PATH }} \
+          dotnet publish src/SampleApp.csproj \
             -c Release \
-            -o ${{ env.PUBLISH_DIR }} \
+            -o publish \
             --no-self-contained
 
       - name: Deploy to Azure App Service
